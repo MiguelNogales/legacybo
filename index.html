@@ -130,29 +130,107 @@
   .lg-plan li::before{content:"";flex:none;width:10px;height:5px;margin-top:6px;border-left:2px solid var(--cyan-text);border-bottom:2px solid var(--cyan-text);transform:rotate(-45deg)}
   .lg-plan li.perk{color:var(--cyan-text);font-weight:600}
 
-  /* ============ ProductCard ============ */
+  /* ============ ProductCard ============
+     Foto 4:5 en carrusel (deslizable en celular, flechas al pasar el mouse) · badges arriba a la izquierda (AGOTADO a la derecha)
+     · panel de tallas al pasar el mouse o al llegar con teclado (solo en equipos con mouse) · marca · nombre · colores · tallas · precio · botón */
+  [hidden]{display:none!important}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   .lg-product{padding:0;overflow:hidden;display:flex;flex-direction:column}
+  .lg-product:focus{outline:none}
   .lg-product .photo{aspect-ratio:4/5;background:var(--surface);border-bottom:1px solid var(--line);position:relative;overflow:hidden}
-  .lg-product .photo .pic{width:100%;height:100%;object-fit:cover;display:block}
-  .lg-product.light .photo .pic{filter:brightness(.8) contrast(1.05)}   /* iguala las fotos de fondo claro mientras no haya fotos con fondo gris uniforme */
+  .lg-product .slides{display:flex;width:100%;height:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+  .lg-product .slides::-webkit-scrollbar{display:none}
+  .lg-product .pic{flex:0 0 100%;width:100%;height:100%;object-fit:cover;display:block;scroll-snap-align:start;user-select:none;-webkit-user-drag:none}
+  .pic.claro,.line img.claro,.ss-prod img.claro{filter:brightness(.8) contrast(1.05)}   /* iguala las fotos de fondo claro mientras no haya fotos con fondo gris uniforme */
   .lg-product .photo .seal{position:absolute;right:10px;bottom:10px;height:26px;width:auto;opacity:.4;pointer-events:none}
-  .lg-product .badges{position:absolute;top:10px;left:10px;display:flex;flex-direction:column;gap:var(--space-1);align-items:flex-start}
-  .lg-product .sold-at{position:absolute;top:12px;right:10px}
+  .lg-product .badges{position:absolute;top:10px;left:10px;display:flex;flex-direction:column;gap:var(--space-1);align-items:flex-start;pointer-events:none}
+  .lg-product .sold-at{position:absolute;top:12px;right:10px;pointer-events:none}
+  .lg-product .dots{position:absolute;left:0;right:0;bottom:12px;display:flex;justify-content:center;gap:6px;pointer-events:none;transition:opacity .15s}
+  .lg-product .dots span{width:6px;height:6px;border-radius:3px;background:rgba(240,251,252,.5);transition:width .2s,background .2s}
+  .lg-product .dots span.on{width:16px;background:var(--ink)}
+  .lg-product .nav{position:absolute;top:50%;margin-top:-18px;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:rgba(10,14,15,.78);color:var(--ink);display:none;align-items:center;justify-content:center;cursor:pointer;font-size:18px}
+  .lg-product .nav.prev{left:8px}.lg-product .nav.next{right:8px}
+  .lg-product .nav:hover{border-color:var(--cyan)}
+  .lg-product .quick{display:none}
   .lg-product .body{padding:var(--space-4);display:flex;flex-direction:column;gap:var(--space-2);flex:1}
   .lg-product .name{font-family:var(--font-display);font-weight:400;font-size:22px;line-height:1.05;letter-spacing:1px;text-transform:uppercase}
   .lg-product .meta{font-size:14px;line-height:20px;color:var(--ink-muted)}
+  .lg-product .meta s{opacity:.75}
+  .lg-product .in-cart{font-size:13px;line-height:18px;color:var(--cyan-text);display:flex;gap:var(--space-1);align-items:center}
+  .lg-product .in-cart i{font-size:15px}
   .lg-product .price{font-family:var(--font-display);font-size:28px;line-height:1;letter-spacing:1px;color:var(--cyan-text);margin-top:auto;padding-top:var(--space-1)}
   .lg-product.is-sold .photo .pic,.lg-product.is-sold .photo .seal{opacity:.45}
   .lg-product.pulse{animation:pulse 1.6s ease 2}
   @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(100,200,220,0)}50%{box-shadow:0 0 0 4px rgba(100,200,220,.55)}}
-  .sizes{display:flex;gap:6px;flex-wrap:wrap}
-  .sz{min-width:40px;height:32px;padding:0 8px;border-radius:var(--radius-md);border:1px solid var(--line);background:var(--surface);color:var(--ink-muted);font-family:var(--font-cond);font-size:14px;font-weight:700;letter-spacing:.06em;cursor:pointer}
-  .sz:hover{border-color:var(--cyan)}
-  .sz[aria-pressed="true"]{border-color:var(--cyan);color:var(--ink);background:rgba(20,170,190,.16)}
-  .sz:disabled{cursor:default}
-  .sizes.flash .sz{animation:flash .5s ease 2}
-  @keyframes flash{50%{border-color:var(--cyan-glow);color:var(--cyan-glow)}}
-  .lg-btn .rm{font-weight:400;color:var(--ink-muted);font-size:13px}
+  /* Colores: un cuadrito por color; no aparece si la prenda tiene un solo color (DARC SPORT) */
+  .swatches{display:flex;gap:6px;flex-wrap:wrap}
+  .sw{width:30px;height:30px;padding:3px;border-radius:var(--radius-sm);border:1px solid var(--line);background:transparent;cursor:pointer}
+  .sw::before{content:"";display:block;width:100%;height:100%;border-radius:3px;background:var(--sw)}
+  .sw:hover{border-color:var(--cyan)}
+  .sw[aria-pressed="true"]{border:2px solid var(--ink);padding:2px}
+  /* Color agotado: cuadrito atenuado y tachado en diagonal */
+  .sw{position:relative}
+  .sw.off::before{opacity:.45}
+  .sw.off::after{content:"";position:absolute;left:50%;top:1px;bottom:1px;width:2px;margin-left:-1px;background:var(--ink);box-shadow:0 0 0 1px var(--surface);transform:rotate(45deg);pointer-events:none}
+  .sw-label{font-size:14px;line-height:20px;color:var(--ink-muted);margin-bottom:var(--space-2)}
+  .sw-label b{color:var(--ink);font-weight:600}
+  /* Solo disponibles */
+  .avail{display:inline-flex;align-items:center;gap:var(--space-2);font-family:var(--font-cond);font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-muted);cursor:pointer}
+  .avail input{width:18px;height:18px;accent-color:var(--cyan);margin:0;cursor:pointer}
+  .avail .n{letter-spacing:0}
+  .sheet .selects label.avail{justify-content:flex-start;padding:6px 0}
+  /* Solo en equipos con mouse: flechas del carrusel y panel de tallas. En pantallas táctiles se desliza y "Lo quiero" abre la hoja de tallas. */
+  @media (hover:hover) and (pointer:fine){
+    .lg-product .nav{display:flex;opacity:0;transition:opacity .15s}
+    .lg-product .photo:hover .nav,.lg-product .nav:focus-visible{opacity:1}
+    .lg-product .quick{display:block;position:absolute;left:8px;right:8px;bottom:8px;background:rgba(10,14,15,.92);border:1px solid var(--line);border-radius:var(--radius-md);padding:var(--space-3);
+      opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity .15s,transform .15s}
+    .lg-product:hover .quick,.lg-product:has(.quick :focus-visible) .quick{opacity:1;transform:none;pointer-events:auto}
+    .lg-product:hover .dots{opacity:0}
+  }
+  .q-t{display:block;font-family:var(--font-cond);font-weight:600;font-size:12px;line-height:16px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:var(--space-2)}
+  .q-sizes{display:flex;flex-wrap:wrap;gap:6px}
+  .qs{min-width:42px;height:36px;padding:0 8px;border-radius:var(--radius-md);border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:var(--font-cond);font-size:15px;font-weight:700;letter-spacing:.06em;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:3px;transition:background .12s,border-color .12s}
+  .qs:hover:not(:disabled){background:var(--cyan);border-color:var(--cyan);color:var(--on-cyan)}
+  .qs.in{border-color:var(--cyan)}
+  .qs i{font-size:14px;color:var(--cyan-text)}
+  .qs:hover i{color:inherit}
+  .qs:disabled{color:var(--ink-muted);text-decoration:line-through;opacity:.6;cursor:not-allowed}
+
+  /* ============ Hojas (tallas, filtros): desde abajo en celular, centradas en escritorio ============ */
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:62;background:var(--surface);border-top:1px solid var(--line);border-radius:var(--radius-lg) var(--radius-lg) 0 0;max-height:88dvh;display:flex;flex-direction:column;
+    transform:translateY(100%);visibility:hidden;transition:transform .28s ease,visibility 0s .28s}
+  .sheet.open{transform:none;visibility:visible;transition:transform .28s ease}
+  .sh-body{overflow-y:auto;padding:var(--space-4) 18px var(--space-5)}
+  .sh-foot{display:flex;gap:var(--space-3);padding:var(--space-3) 18px calc(var(--space-3) + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+  .sh-foot .lg-btn-primary{flex:1;justify-content:center}
+  @media (min-width:721px){
+    .sheet{left:50%;right:auto;top:50%;bottom:auto;width:min(460px,92vw);border:1px solid var(--line);border-radius:var(--radius-lg);transform:translate(-50%,-46%);opacity:0;
+      transition:opacity .2s,transform .2s,visibility 0s .2s}
+    .sheet.open{transform:translate(-50%,-50%);opacity:1;transition:opacity .2s,transform .2s}
+  }
+  .ss-prod{display:grid;grid-template-columns:64px 1fr;gap:var(--space-3);align-items:center;margin-bottom:var(--space-4)}
+  .ss-prod img{width:64px;height:80px;object-fit:cover;border-radius:6px;background:var(--surface-raised)}
+  .ss-name{font-family:var(--font-display);font-size:20px;line-height:1.05;letter-spacing:.5px;text-transform:uppercase;margin-top:var(--space-1)}
+  .ss-meta{font-size:14px;line-height:20px;color:var(--ink-muted)}
+  .ss-price{font-family:var(--font-display);font-size:20px;letter-spacing:1px;color:var(--cyan-text)}
+  .sheet .swatches{margin-bottom:var(--space-4)}
+  .sz-rows{list-style:none;border-top:1px solid var(--line)}
+  .sz-row{display:flex;align-items:center;gap:var(--space-3);width:100%;min-height:52px;padding:0 var(--space-1);background:none;border:none;border-bottom:1px solid var(--line);color:var(--ink);text-decoration:none;cursor:pointer;font:inherit;text-align:left}
+  .sz-row:hover:not(:disabled){background:var(--surface-raised)}
+  .sz-row:disabled{cursor:default}
+  .sz-row .s{font-family:var(--font-cond);font-weight:700;font-size:18px;letter-spacing:.06em;min-width:48px}
+  .sz-row .st{flex:1;font-size:13px;line-height:18px;color:var(--ink-muted)}
+  .sz-row .go{font-weight:600;font-size:14px;color:var(--cyan-text);display:flex;gap:var(--space-1);align-items:center}
+  .sz-row.off .s{color:var(--ink-muted);text-decoration:line-through}
+  .sz-row.off .go{color:var(--ink);text-decoration:underline}
+  .guide-link{margin-top:var(--space-4);background:none;border:none;color:var(--cyan-text);text-decoration:underline;cursor:pointer;font-size:14px;display:inline-flex;gap:6px;align-items:center;padding:6px 0}
+  .guide-link i{font-size:18px}
+  .guide table{width:100%;border-collapse:collapse;font-size:14px;margin-top:var(--space-3)}
+  .guide th,.guide td{padding:10px var(--space-1);border-bottom:1px solid var(--line);text-align:left}
+  .guide thead th{font-family:var(--font-cond);font-weight:600;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-muted)}
+  .guide tbody th{font-family:var(--font-cond);font-weight:700;font-size:16px;letter-spacing:.06em}
+  .gnote{font-size:13px;line-height:18px;color:var(--ink-muted);margin-top:var(--space-3)}
 
   /* Equípate para tu plan (Coaching → Store) */
   .gear{border-top:1px solid var(--line)}
@@ -181,6 +259,16 @@
   .fchip{background:transparent;border:1px solid var(--line);color:var(--ink);font-family:var(--font-cond);font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:6px 14px;border-radius:var(--radius-pill);cursor:pointer;transition:border-color .18s}
   .fchip:hover{border-color:var(--cyan)}
   .fchip[aria-pressed="true"]{background:var(--cyan);color:var(--on-cyan);border-color:var(--cyan)}
+  .fchip .n{font-weight:600;opacity:.7;margin-left:2px}
+  .fchip:disabled{opacity:.4;cursor:not-allowed}
+  .filter-toggle{display:none}
+  .fcount{min-width:20px;height:20px;border-radius:10px;background:var(--cyan);color:var(--on-cyan);font-family:var(--font-cond);font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
+  /* Filtros dentro de la hoja (celular) */
+  .sheet .filters{margin:0;gap:var(--space-5)}
+  .sheet .chips{gap:var(--space-2)}
+  .sheet .selects{display:flex;flex-direction:column;gap:var(--space-3)}
+  .sheet .selects label{justify-content:space-between}
+  .sheet .selects select{width:62%;padding:10px}
   .selects{display:flex;gap:var(--space-3);flex-wrap:wrap}
   .selects label{display:flex;align-items:center;gap:var(--space-2);font-family:var(--font-cond);font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-muted)}
   .selects select{background:var(--surface-raised);border:1px solid var(--line);border-radius:var(--radius-md);padding:8px 10px;font-size:14px;color:var(--ink);cursor:pointer;font-family:var(--font-sans);letter-spacing:0;text-transform:none}
@@ -189,11 +277,8 @@
   .clear.show{display:inline}
   .store-grid{display:grid;gap:var(--space-4);grid-template-columns:repeat(4,1fr)}
   .empty{grid-column:1/-1;padding:50px 10px;color:var(--ink-muted)}
-  .pager{display:flex;justify-content:center;align-items:center;gap:6px;margin-top:var(--space-6)}
-  .pg{background:var(--surface-raised);border:1px solid var(--line);color:var(--ink-muted);min-width:40px;height:40px;border-radius:var(--radius-md);cursor:pointer;font-family:var(--font-cond);font-weight:700;font-size:15px}
-  .pg:hover:not(:disabled){border-color:var(--cyan);color:var(--ink)}
-  .pg[aria-current="page"]{background:var(--cyan);color:var(--on-cyan);border-color:var(--cyan)}
-  .pg:disabled{opacity:.35;cursor:not-allowed}
+  .more-row{display:flex;flex-direction:column;align-items:center;gap:var(--space-2);margin-top:var(--space-6)}
+  .more-row p{font-size:13px;line-height:18px;color:var(--ink-muted)}
 
   /* ============ CONTACTO ============ */
   .contact-view{min-height:calc(100dvh - var(--hdr));padding:var(--space-8) 24px;display:flex;align-items:center;
@@ -219,7 +304,11 @@
   .line .ln{font-family:var(--font-display);font-size:18px;line-height:1.05;letter-spacing:.5px;text-transform:uppercase}
   .line .lm{font-size:13px;line-height:18px;color:var(--ink-muted);margin-top:2px}
   .line .lp{font-family:var(--font-display);font-size:20px;color:var(--cyan-text);letter-spacing:1px;text-align:right}
-  .line .lr{background:none;border:none;color:var(--ink-muted);font-size:13px;cursor:pointer;text-decoration:underline;display:block;margin-left:auto}
+  .line .lr{background:none;border:none;color:var(--ink-muted);font-size:13px;cursor:pointer;text-decoration:underline;display:block;margin-left:auto;padding:4px 0}
+  .qty{display:inline-flex;align-items:center;gap:var(--space-2);margin-top:6px;font-size:14px}
+  .qty button{width:30px;height:30px;border-radius:6px;border:1px solid var(--line);background:var(--surface-raised);color:var(--ink);cursor:pointer;font-size:16px;line-height:1}
+  .qty button:hover:not(:disabled){border-color:var(--cyan)}
+  .qty button:disabled{opacity:.35;cursor:not-allowed}
   .cart-empty{color:var(--ink-muted);padding:40px 0;font-size:16px}
   .cart-empty .lg-btn{margin-top:var(--space-4)}
   .totals{display:flex;justify-content:space-between;align-items:baseline;padding:14px 0 4px}
@@ -244,8 +333,9 @@
   .member-check span{font-size:14px;line-height:20px;color:var(--ink-muted)}
   .dr-foot{padding:14px 18px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
 
-  .toast{position:fixed;left:50%;bottom:88px;transform:translate(-50%,20px);background:var(--surface-raised);border:1px solid var(--cyan);color:var(--ink);font-size:14px;padding:10px 16px;border-radius:var(--radius-md);z-index:70;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;display:flex;gap:8px;align-items:center}
-  .toast.show{opacity:1;transform:translate(-50%,0)}
+  .toast{position:fixed;left:50%;bottom:88px;transform:translate(-50%,20px);background:var(--surface-raised);border:1px solid var(--cyan);color:var(--ink);font-size:14px;padding:10px 16px;border-radius:var(--radius-md);z-index:70;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;display:flex;gap:8px;align-items:center;width:max-content;max-width:calc(100vw - 32px)}
+  .toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+  .toast-act{background:none;border:none;color:var(--cyan-text);font-weight:600;font-size:14px;text-decoration:underline;cursor:pointer;padding:4px 0 4px 6px;white-space:nowrap}
   .toast i{color:var(--cyan-text);font-size:18px}
 
   /* WhatsApp flotante: cyan, sin el verde de WhatsApp (manual: Color) */
@@ -269,9 +359,8 @@
     .lg-product .name{font-size:19px}
     .lg-product .price{font-size:24px}
     .lg-product .lg-btn{padding:10px 8px;font-size:14px}
-    .selects{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-    .selects label span{display:none}
-    .selects select{width:100%;padding:8px 6px;font-size:13px}
+    #filtersHome{display:none}
+    .filter-toggle{display:inline-flex;width:100%;justify-content:center}
     .contact-view{padding:var(--space-7) 16px}
     .wa-float{bottom:16px;right:16px;width:52px;height:52px}
   }
@@ -382,23 +471,27 @@
         <button class="lg-btn lg-btn-ghost" data-goplans="1">Ver planes</button>
       </div>
 
-      <div class="filters">
+      <!-- En celular los filtros se mueven a la hoja #filterSheet y vuelven aquí al cerrarla -->
+      <div id="filtersHome"><div class="filters">
         <div><div class="seg" id="genderSeg" role="group" aria-label="Género">
           <button data-g="all" aria-pressed="true">Todos</button><button data-g="H" aria-pressed="false">Hombre</button><button data-g="M" aria-pressed="false">Mujer</button>
         </div></div>
         <div class="chips" id="brandChips" role="group" aria-label="Marca"></div>
         <div class="selects">
-          <label><span>Categoría</span><select id="fCat" aria-label="Categoría"></select></label>
-          <label><span>Talla</span><select id="fSize" aria-label="Talla"></select></label>
-          <label><span>Ordenar</span><select id="fSort" aria-label="Ordenar">
+          <label><span>Categoría</span><select id="fCat"></select></label>
+          <label><span>Talla</span><select id="fSize"></select></label>
+          <label><span>Color</span><select id="fColor"></select></label>
+          <label><span>Ordenar</span><select id="fSort">
             <option value="featured">Destacados</option><option value="new">Novedades</option>
             <option value="asc">Precio: menor a mayor</option><option value="desc">Precio: mayor a menor</option></select></label>
+          <label class="avail"><input type="checkbox" id="fAvail">Solo disponibles <span class="n" id="fAvailN"></span></label>
         </div>
-      </div>
-      <div class="meta-row"><span id="storeCount"></span><button class="clear" id="clearBtn">Limpiar filtros</button></div>
+      </div></div>
+      <button class="lg-btn lg-btn-ghost filter-toggle" id="filterToggle" aria-haspopup="dialog"><i class="ti ti-adjustments-horizontal" aria-hidden="true"></i>Filtrar y ordenar <span class="fcount" id="fCount" hidden>0</span></button>
+      <div class="meta-row"><span id="storeCount" aria-live="polite"></span><button class="clear" id="clearBtn" data-clear>Limpiar filtros</button></div>
 
       <div class="store-grid" id="storeGrid"></div>
-      <nav class="pager" id="pager" aria-label="Páginas"></nav>
+      <div class="more-row" id="moreRow" hidden><p id="moreInfo"></p><button class="lg-btn lg-btn-ghost" id="moreBtn">Ver más</button></div>
     </div></div>
   </section>
 
@@ -420,11 +513,11 @@
 <!-- CARRITO -->
 <div class="overlay" id="overlay"></div>
 <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drTitle" aria-hidden="true" inert>
-  <div class="dr-head"><h2 id="drTitle">Tu pedido</h2><button class="icon-btn" id="closeCart" aria-label="Cerrar"><i class="ti ti-x" aria-hidden="true"></i></button></div>
+  <div class="dr-head"><h2 id="drTitle">Tu pedido</h2><button class="icon-btn" id="closeCart" data-close aria-label="Cerrar"><i class="ti ti-x" aria-hidden="true"></i></button></div>
   <div class="dr-body">
     <div id="cartLines"></div>
     <div id="cartRest">
-      <div class="totals"><span>Total (<span id="cartN">0</span> prendas)</span><b id="cartTotal">0 Bs</b></div>
+      <div class="totals"><span>Total (<span id="cartN">0 prendas</span>)</span><b id="cartTotal">0 Bs</b></div>
       <p class="note">El envío y el pago se coordinan por WhatsApp al confirmar tu pedido.</p>
       <form class="form" id="orderForm" novalidate>
         <h3 class="label">Datos de entrega</h3>
@@ -440,7 +533,20 @@
   <div class="dr-foot"><button class="lg-btn lg-btn-primary lg-btn-block" id="sendOrder">Enviar pedido <span class="wa">por WhatsApp</span></button></div>
 </aside>
 
-<div class="toast" id="toast" role="status"><i class="ti ti-circle-check" aria-hidden="true"></i><span id="toastText"></span></div>
+<!-- HOJA DE TALLAS (celular: "Lo quiero" abre esta hoja; escritorio: se ve centrada) -->
+<div class="sheet" id="sizeSheet" role="dialog" aria-modal="true" aria-labelledby="ssTitle" aria-hidden="true" inert>
+  <div class="dr-head"><h2 id="ssTitle">Elige tu talla</h2><button class="icon-btn" data-close aria-label="Cerrar"><i class="ti ti-x" aria-hidden="true"></i></button></div>
+  <div class="sh-body" id="ssBody"></div>
+</div>
+
+<!-- HOJA DE FILTROS (solo celular) -->
+<div class="sheet" id="filterSheet" role="dialog" aria-modal="true" aria-labelledby="fsTitle" aria-hidden="true" inert>
+  <div class="dr-head"><h2 id="fsTitle">Filtrar y ordenar</h2><button class="icon-btn" data-close aria-label="Cerrar"><i class="ti ti-x" aria-hidden="true"></i></button></div>
+  <div class="sh-body" id="fsBody"></div>
+  <div class="sh-foot"><button class="lg-btn lg-btn-ghost" data-clear>Limpiar</button><button class="lg-btn lg-btn-primary" id="fsApply">Ver prendas</button></div>
+</div>
+
+<div class="toast" id="toast" role="status"><i class="ti ti-circle-check" aria-hidden="true"></i><span id="toastText"></span><button class="toast-act" id="toastAct" hidden></button></div>
 <a class="wa-float" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp" id="waFloat"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></a>
 
 <script>
@@ -484,6 +590,8 @@ function showView(id){
   document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === id));
   document.querySelectorAll(".tab").forEach(t => t.dataset.view === id ? t.setAttribute("aria-current", "page") : t.removeAttribute("aria-current"));
   scrollTo({top:0});
+  // Los filtros del Store viven en el enlace (?tienda&marca=…); fuera del Store el enlace queda limpio.
+  if (id === "tienda") syncUrl(); else if (location.search) history.replaceState(null, "", location.pathname);
 }
 document.addEventListener("click", e => {
   const v = e.target.closest("[data-view]");
@@ -516,160 +624,361 @@ $("plansgrid").innerHTML = PLANS.map(p =>
   wa("Hola, me interesa " + p.name + ". ¿Me cuentas cómo empezamos?") + '">Quiero este plan <span class="wa">por WhatsApp</span></a></article>'
 ).join("");
 
-/* ---------- Productos ---------- */
-const PRODUCTS = [{"brand": "DARC SPORT", "name": "DEMON SLAYER \"SIDE-BY-SIDE\" TEE BOX", "price": 1180, "sold": true, "photo": "img/productos/00-demon-slayer-side-by-side-tee-box.webp", "light": false, "id": 0, "gender": "H", "cat": "Camisetas", "tag": null, "sizes": ["XXL"], "color": "Negro"}, {"brand": "DARC SPORT", "name": "UCHIHA CLAN \"SIDE-BY-SIDE\" TEE BOX", "price": 1180, "sold": false, "photo": "img/productos/01-uchiha-clan-side-by-side-tee-box.webp", "light": false, "id": 1, "gender": "H", "cat": "Camisetas", "tag": "drop", "sizes": ["L"], "color": "Negro"}, {"brand": "DARC SPORT", "name": "BAKI SON OF OGRE \"SIDE-BY-SIDE\" TEE", "price": 1180, "sold": false, "photo": "img/productos/02-baki-son-of-ogre-side-by-side-tee.webp", "light": false, "id": 2, "gender": "H", "cat": "Camisetas", "tag": "nuevo", "sizes": ["L"], "color": "Negro"}, {"brand": "DARC SPORT", "name": "BROLY VS GOGETA \"SIDE BY SIDE\" TEE", "price": 1180, "sold": false, "photo": "img/productos/03-broly-vs-gogeta-side-by-side-tee.webp", "light": false, "id": 3, "gender": "H", "cat": "Camisetas", "tag": "ultima", "sizes": ["M"], "color": "Negro"}, {"brand": "DARC SPORT", "name": "HARLEY - THE SNAKE & THE WOLF TEE", "price": 1080, "sold": false, "photo": "img/productos/04-harley-the-snake-the-wolf-tee.webp", "light": false, "id": 4, "gender": "H", "cat": "Camisetas", "tag": null, "sizes": ["XL"], "color": "Negro"}, {"brand": "DARC SPORT", "name": "LOUNGE SWEAT SHORTS V2", "price": 890, "sold": false, "photo": "img/productos/05-lounge-sweat-shorts-v2.webp", "light": false, "id": 5, "gender": "U", "cat": "Pantalones y shorts", "tag": null, "sizes": ["M"], "color": "Negro lavado"}, {"brand": "DARC SPORT", "name": "WOLVES HAVE YOUR BACK TEE", "price": 1040, "sold": false, "photo": "img/productos/06-wolves-have-your-back-tee.webp", "light": false, "id": 6, "gender": "U", "cat": "Camisetas", "tag": "ultima", "sizes": ["M"], "color": "Rosa vintage"}, {"brand": "DARC SPORT", "name": "WOLVES HAVE YOUR BACK TEE", "price": 1040, "sold": false, "photo": "img/productos/07-wolves-have-your-back-tee.webp", "light": false, "id": 7, "gender": "U", "cat": "Camisetas", "tag": null, "sizes": ["L"], "color": "Camuflaje"}, {"brand": "DARC SPORT", "name": "CARNAGE FOREVER OVERSIZED TEE", "price": 1180, "sold": false, "photo": "img/productos/08-carnage-forever-oversized-tee.webp", "light": false, "id": 8, "gender": "H", "cat": "Camisetas", "tag": null, "sizes": ["M", "XL"], "color": "Negro"}, {"brand": "DARC SPORT", "name": "WOLVES INFERNO OVERSIZED TEE", "price": 1040, "sold": false, "photo": "img/productos/09-wolves-inferno-oversized-tee.webp", "light": false, "id": 9, "gender": "H", "cat": "Camisetas", "tag": null, "sizes": ["L", "XL"], "color": "Negro"}, {"brand": "DARC SPORT", "name": "GYOMEI \"PREMIUM\" OVERSIZED TEE", "price": 1080, "sold": false, "photo": "img/productos/10-gyomei-premium-oversized-tee.webp", "light": false, "id": 10, "gender": "H", "cat": "Camisetas", "tag": "nuevo", "sizes": ["L"], "color": "Negro"}, {"brand": "DARC SPORT", "name": "FADED PAISLEY \"MAYA\" SEAMLESS BRA", "price": 700, "sold": false, "photo": "img/productos/11-faded-paisley-maya-seamless-bra.webp", "light": false, "id": 11, "gender": "M", "cat": "Tops y bras", "tag": null, "sizes": ["S", "M"], "color": "Negro"}, {"brand": "DARC SPORT", "name": "DEATH WOLF OVERSIZED TEE", "price": 1080, "sold": true, "photo": "img/productos/12-death-wolf-oversized-tee.webp", "light": false, "id": 12, "gender": "H", "cat": "Camisetas", "tag": null, "sizes": ["M"], "color": "Negro"}, {"brand": "DARC SPORT", "name": "DARC ANGEL OVERSIZED TEE", "price": 1080, "sold": false, "photo": "img/productos/13-darc-angel-oversized-tee.webp", "light": false, "id": 13, "gender": "H", "cat": "Camisetas", "tag": "ultima", "sizes": ["M"], "color": "Negro"}, {"brand": "YoungLA", "name": "4041 WARRIOR COMPRESSION TEE", "price": 850, "sold": false, "photo": "img/productos/14-4041-warrior-compression-tee.webp", "light": true, "id": 14, "gender": "H", "cat": "Compresión", "tag": null, "sizes": ["XL"], "color": "Negro"}, {"brand": "YoungLA", "name": "4259 BATMAN COMPRESSION TEE", "price": 1080, "sold": false, "photo": "img/productos/15-4259-batman-compression-tee.webp", "light": false, "id": 15, "gender": "H", "cat": "Compresión", "tag": null, "sizes": ["M", "L", "XL"], "color": "Negro"}, {"brand": "YoungLA", "name": "4117 SUPERMAN COMPRESSION TEE", "price": 1080, "sold": false, "photo": "img/productos/16-4117-superman-compression-tee.webp", "light": false, "id": 16, "gender": "H", "cat": "Compresión", "tag": "ultima", "sizes": ["M"], "color": "Negro"}, {"brand": "YoungLA", "name": "266 CLOUD 9 JOGGERS", "price": 1080, "sold": false, "photo": "img/productos/17-266-cloud-9-joggers.webp", "light": false, "id": 17, "gender": "H", "cat": "Pantalones y shorts", "tag": null, "sizes": ["M"], "color": "Negro"}, {"brand": "YoungLA", "name": "5174 BATMAN MIDNIGHT HOODIE", "price": 1800, "sold": false, "photo": "img/productos/18-5174-batman-midnight-hoodie.webp", "light": false, "id": 18, "gender": "H", "cat": "Hoodies", "tag": "nuevo", "sizes": ["XXL"], "color": "Negro"}, {"brand": "Gymshark", "name": "CREST JOGGERS", "price": 790, "sold": false, "photo": "img/productos/19-crest-joggers.webp", "light": true, "id": 19, "gender": "H", "cat": "Pantalones y shorts", "tag": null, "sizes": ["L"], "color": "Negro"}, {"brand": "Gymshark", "name": "ESSENTIAL OVERSIZED JOGGERS", "price": 790, "sold": false, "photo": "img/productos/20-essential-oversized-joggers.webp", "light": true, "id": 20, "gender": "H", "cat": "Pantalones y shorts", "tag": null, "sizes": ["L"], "color": "Negro"}, {"brand": "Gymshark", "name": "POWER T-SHIRT", "price": 680, "sold": false, "photo": "img/productos/21-power-t-shirt.webp", "light": true, "id": 21, "gender": "H", "cat": "Camisetas", "tag": null, "sizes": ["L"], "color": "Gris topo"}, {"brand": "Gymshark", "name": "MINIMAL SPORTS BRA", "price": 370, "sold": false, "photo": "img/productos/22-minimal-sports-bra.webp", "light": true, "id": 22, "gender": "M", "cat": "Tops y bras", "tag": "ultima", "sizes": ["S"], "color": "Celeste"}, {"brand": "Gymshark", "name": "LIFTING DIPPED WAISTBAND SHORT", "price": 450, "sold": false, "photo": "img/productos/23-lifting-dipped-waistband-short.webp", "light": false, "id": 23, "gender": "M", "cat": "Pantalones y shorts", "tag": "nuevo", "sizes": ["L"], "color": "Azul"}];
+/* ---------- Productos ----------
+   Qué se carga por cada prenda (una fila por prenda y color en la planilla del administrador):
+     id · marca · modelo (opcional: el número de YoungLA) · nombre · categoria · genero (H | M | U) · precio (Bs)
+     etiqueta: "nuevo" | "drop" | "ultimas" | null   (AGOTADO no se carga: se calcula con el stock)
+     colores: [{ nombre (el que ve el cliente), familia (para el filtro de color), muestra (color del cuadrito),
+                 fotos: [principal, segunda, …] (4:5, fondo gris), stock: { talla: unidades }, claro (opcional: foto de fondo claro) }]
+   Reglas:
+     - Una prenda con un solo color (todo DARC SPORT) no muestra cuadritos de color: solo tallas.
+     - Una talla con stock 0 se muestra tachada con "Avísame si vuelve". Si todas están en 0, la prenda está AGOTADA.
+     - El pedido no deja pedir más unidades de las que hay en stock.
+   Las fotos "-detalle" son recortes de la foto principal para mostrar el carrusel en el mockup: reemplazar con fotos reales. */
+const PRODUCTS = [
+  {"id": 0, "marca": "DARC SPORT", "nombre": "DEMON SLAYER \"SIDE-BY-SIDE\" TEE BOX", "categoria": "Camisetas", "genero": "H", "precio": 1180, "etiqueta": null, "colores": [{"nombre": "Negro", "familia": "negro", "muestra": "#111315", "fotos": ["img/productos/00-demon-slayer-side-by-side-tee-box.webp", "img/productos/00-demon-slayer-side-by-side-tee-box-detalle.webp"], "stock": {"XXL": 0}}]},
+  {"id": 1, "marca": "DARC SPORT", "nombre": "UCHIHA CLAN \"SIDE-BY-SIDE\" TEE BOX", "categoria": "Camisetas", "genero": "H", "precio": 1180, "etiqueta": "drop", "colores": [{"nombre": "Negro", "familia": "negro", "muestra": "#111315", "fotos": ["img/productos/01-uchiha-clan-side-by-side-tee-box.webp", "img/productos/01-uchiha-clan-side-by-side-tee-box-detalle.webp"], "stock": {"L": 1}}]},
+  {"id": 2, "marca": "DARC SPORT", "nombre": "BAKI SON OF OGRE \"SIDE-BY-SIDE\" TEE", "categoria": "Camisetas", "genero": "H", "precio": 1180, "etiqueta": "nuevo", "colores": [{"nombre": "Negro", "familia": "negro", "muestra": "#111315", "fotos": ["img/productos/02-baki-son-of-ogre-side-by-side-tee.webp", "img/productos/02-baki-son-of-ogre-side-by-side-tee-detalle.webp"], "stock": {"L": 1}}]},
+  {"id": 3, "marca": "DARC SPORT", "nombre": "BROLY VS GOGETA \"SIDE BY SIDE\" TEE", "categoria": "Camisetas", "genero": "H", "precio": 1180, "etiqueta": "ultimas", "colores": [{"nombre": "Negro", "familia": "negro", "muestra": "#111315", "fotos": ["img/productos/03-broly-vs-gogeta-side-by-side-tee.webp", "img/productos/03-broly-vs-gogeta-side-by-side-tee-detalle.webp"], "stock": {"M": 1}}]},
+  {"id": 4, "marca": "DARC SPORT", "nombre": "HARLEY - THE SNAKE & THE WOLF TEE", "categoria": "Camisetas", "genero": "H", "precio": 1080, "etiqueta": null, "colores": [{"nombre": "Negro", "familia": "negro", "muestra": "#111315", "fotos": ["img/productos/04-harley-the-snake-the-wolf-tee.webp", "img/productos/04-harley-the-snake-the-wolf-tee-detalle.webp"], "stock": {"XL": 1}}]},
+  {"id": 5, "marca": "DARC SPORT", "nombre": "LOUNGE SWEAT SHORTS V2", "categoria": "Pantalones y shorts", "genero": "U", "precio": 890, "etiqueta": null, "colores": [{"nombre": "Negro lavado", "familia": "negro", "muestra": "#2E2F31", "fotos": ["img/productos/05-lounge-sweat-shorts-v2.webp", "img/productos/05-lounge-sweat-shorts-v2-detalle.webp"], "stock": {"M": 1}}]},
+  {"id": 6, "marca": "DARC SPORT", "nombre": "WOLVES HAVE YOUR BACK TEE", "categoria": "Camisetas", "genero": "U", "precio": 1040, "etiqueta": null, "colores": [{"nombre": "Rosa vintage", "familia": "rosa", "muestra": "#C7A1A3", "fotos": ["img/productos/06-wolves-have-your-back-tee.webp", "img/productos/06-wolves-have-your-back-tee-detalle.webp"], "stock": {"M": 1}}, {"nombre": "Camuflaje", "familia": "verde", "muestra": "#5E6148", "fotos": ["img/productos/07-wolves-have-your-back-tee.webp", "img/productos/07-wolves-have-your-back-tee-detalle.webp"], "stock": {"L": 0}}]},
+  {"id": 8, "marca": "DARC SPORT", "nombre": "CARNAGE FOREVER OVERSIZED TEE", "categoria": "Camisetas", "genero": "H", "precio": 1180, "etiqueta": null, "colores": [{"nombre": "Negro", "familia": "negro", "muestra": "#111315", "fotos": ["img/productos/08-carnage-forever-oversized-tee.webp", "img/productos/08-carnage-forever-oversized-tee-detalle.webp"], "stock": {"M": 1, "XL": 1}}]},
+  {"id": 9, "marca": "DARC SPORT", "nombre": "WOLVES INFERNO OVERSIZED TEE", "categoria": "Camisetas", "genero": "H", "precio": 1040, "etiqueta": null, "colores": [{"nombre": "Negro", "familia": "negro", "muestra": "#111315", "fotos": ["img/productos/09-wolves-inferno-oversized-tee.webp", "img/productos/09-wolves-inferno-oversized-tee-detalle.webp"], "stock": {"L": 1, "XL": 2}}]},
+  {"id": 10, "marca": "DARC SPORT", "nombre": "GYOMEI \"PREMIUM\" OVERSIZED TEE", "categoria": "Camisetas", "genero": "H", "precio": 1080, "etiqueta": "nuevo", "colores": [{"nombre": "Negro", "familia": "negro", "muestra": "#111315", "fotos": ["img/productos/10-gyomei-premium-oversized-tee.webp", "img/productos/10-gyomei-premium-oversized-tee-detalle.webp"], "stock": {"L": 1}}]},
+  {"id": 11, "marca": "DARC SPORT", "nombre": "FADED PAISLEY \"MAYA\" SEAMLESS BRA", "categoria": "Tops y bras", "genero": "M", "precio": 700, "etiqueta": null, "colores": [{"nombre": "Negro", "familia": "negro", "muestra": "#111315", "fotos": ["img/productos/11-faded-paisley-maya-seamless-bra.webp", "img/productos/11-faded-paisley-maya-seamless-bra-detalle.webp"], "stock": {"S": 1, "M": 1}}]},
+  {"id": 12, "marca": "DARC SPORT", "nombre": "DEATH WOLF OVERSIZED TEE", "categoria": "Camisetas", "genero": "H", "precio": 1080, "etiqueta": null, "colores": [{"nombre": "Negro", "familia": "negro", "muestra": "#111315", "fotos": ["img/productos/12-death-wolf-oversized-tee.webp", "img/productos/12-death-wolf-oversized-tee-detalle.webp"], "stock": {"M": 0}}]},
+  {"id": 13, "marca": "DARC SPORT", "nombre": "DARC ANGEL OVERSIZED TEE", "categoria": "Camisetas", "genero": "H", "precio": 1080, "etiqueta": "ultimas", "colores": [{"nombre": "Negro", "familia": "negro", "muestra": "#111315", "fotos": ["img/productos/13-darc-angel-oversized-tee.webp", "img/productos/13-darc-angel-oversized-tee-detalle.webp"], "stock": {"M": 1}}]},
+  {"id": 14, "marca": "YoungLA", "modelo": "4041", "nombre": "WARRIOR COMPRESSION TEE", "categoria": "Compresión", "genero": "H", "precio": 850, "etiqueta": null, "colores": [{"nombre": "Negro", "familia": "negro", "muestra": "#111315", "fotos": ["img/productos/14-4041-warrior-compression-tee.webp", "img/productos/14-4041-warrior-compression-tee-detalle.webp"], "stock": {"XL": 1}, "claro": true}]},
+  {"id": 15, "marca": "YoungLA", "modelo": "4259", "nombre": "BATMAN COMPRESSION TEE", "categoria": "Compresión", "genero": "H", "precio": 1080, "etiqueta": null, "colores": [{"nombre": "Negro", "familia": "negro", "muestra": "#111315", "fotos": ["img/productos/15-4259-batman-compression-tee.webp", "img/productos/15-4259-batman-compression-tee-detalle.webp"], "stock": {"M": 2, "L": 1, "XL": 0}}]},
+  {"id": 16, "marca": "YoungLA", "modelo": "4117", "nombre": "SUPERMAN COMPRESSION TEE", "categoria": "Compresión", "genero": "H", "precio": 1080, "etiqueta": "ultimas", "colores": [{"nombre": "Negro", "familia": "negro", "muestra": "#111315", "fotos": ["img/productos/16-4117-superman-compression-tee.webp", "img/productos/16-4117-superman-compression-tee-detalle.webp"], "stock": {"M": 1}}]},
+  {"id": 17, "marca": "YoungLA", "modelo": "266", "nombre": "CLOUD 9 JOGGERS", "categoria": "Pantalones y shorts", "genero": "H", "precio": 1080, "etiqueta": null, "colores": [{"nombre": "Negro", "familia": "negro", "muestra": "#111315", "fotos": ["img/productos/17-266-cloud-9-joggers.webp", "img/productos/17-266-cloud-9-joggers-detalle.webp"], "stock": {"M": 1}}]},
+  {"id": 18, "marca": "YoungLA", "modelo": "5174", "nombre": "BATMAN MIDNIGHT HOODIE", "categoria": "Hoodies", "genero": "H", "precio": 1800, "etiqueta": "nuevo", "colores": [{"nombre": "Negro", "familia": "negro", "muestra": "#111315", "fotos": ["img/productos/18-5174-batman-midnight-hoodie.webp", "img/productos/18-5174-batman-midnight-hoodie-detalle.webp"], "stock": {"XXL": 1}}]},
+  {"id": 19, "marca": "Gymshark", "nombre": "CREST JOGGERS", "categoria": "Pantalones y shorts", "genero": "H", "precio": 790, "etiqueta": null, "colores": [{"nombre": "Negro", "familia": "negro", "muestra": "#111315", "fotos": ["img/productos/19-crest-joggers.webp", "img/productos/19-crest-joggers-detalle.webp"], "stock": {"L": 1}, "claro": true}]},
+  {"id": 20, "marca": "Gymshark", "nombre": "ESSENTIAL OVERSIZED JOGGERS", "categoria": "Pantalones y shorts", "genero": "H", "precio": 790, "etiqueta": null, "colores": [{"nombre": "Negro", "familia": "negro", "muestra": "#111315", "fotos": ["img/productos/20-essential-oversized-joggers.webp", "img/productos/20-essential-oversized-joggers-detalle.webp"], "stock": {"L": 1}, "claro": true}]},
+  {"id": 21, "marca": "Gymshark", "nombre": "POWER T-SHIRT", "categoria": "Camisetas", "genero": "H", "precio": 680, "etiqueta": null, "colores": [{"nombre": "Gris topo", "familia": "gris", "muestra": "#8A837C", "fotos": ["img/productos/21-power-t-shirt.webp", "img/productos/21-power-t-shirt-detalle.webp"], "stock": {"L": 1}, "claro": true}]},
+  {"id": 22, "marca": "Gymshark", "nombre": "MINIMAL SPORTS BRA", "categoria": "Tops y bras", "genero": "M", "precio": 370, "etiqueta": "ultimas", "colores": [{"nombre": "Celeste", "familia": "celeste", "muestra": "#A9D3E8", "fotos": ["img/productos/22-minimal-sports-bra.webp", "img/productos/22-minimal-sports-bra-detalle.webp"], "stock": {"S": 1}, "claro": true}]},
+  {"id": 23, "marca": "Gymshark", "nombre": "LIFTING DIPPED WAISTBAND SHORT", "categoria": "Pantalones y shorts", "genero": "M", "precio": 450, "etiqueta": "nuevo", "colores": [{"nombre": "Azul", "familia": "azul", "muestra": "#2C4C8C", "fotos": ["img/productos/23-lifting-dipped-waistband-short.webp", "img/productos/23-lifting-dipped-waistband-short-detalle.webp"], "stock": {"L": 1}}]}
+];
 const byId = Object.fromEntries(PRODUCTS.map(p => [p.id, p]));
-const SIZE_ORDER = ["XS","S","M","L","XL","XXL"];
-const TAG = {nuevo:["lg-badge-new","Nuevo"], drop:["lg-badge-drop","Drop · Edición limitada"], ultima:["lg-badge-last","Últimas unidades"]};
-const st = {gender:"all", brand:"Todas", cat:"", size:"", sort:"featured", page:1};
-const PER_PAGE = 8;
-const chosen = {};   // id -> talla elegida
+const SIZE_ORDER = ["XS","S","M","L","XL","XXL","3XL"];
+const TAG = {nuevo:["lg-badge-new","Nuevo"], drop:["lg-badge-drop","Drop · Edición limitada"], ultimas:["lg-badge-last","Últimas unidades"]};
+const FAMILIAS = {negro:"Negro", blanco:"Blanco", gris:"Gris", azul:"Azul", celeste:"Celeste", verde:"Verde", rosa:"Rosa", rojo:"Rojo", beige:"Beige"};
+const PER_PAGE = 12;
 
-/* Equípate: selección curada para el plan */
-const GEAR = [14, 19, 23, 15];
-$("gearRow").innerHTML = GEAR.map(id => { const p = byId[id];
-  return '<button class="lg-card lg-product' + (p.light ? " light" : "") + '" data-goto="' + id + '"><div class="photo"><img class="pic" src="' + p.photo + '" alt="" loading="lazy"><img class="seal" src="' + SEAL + '" alt=""></div>' +
-  '<div class="body"><span><span class="lg-badge lg-badge-brand">' + esc(p.brand) + '</span></span><span class="name">' + esc(p.name) + '</span><span class="meta">' + esc(p.color) + '</span><span class="price">' + fmt(p.price) + '</span></div></button>';
-}).join("");
-$("gearRow").addEventListener("click", e => { const b = e.target.closest("[data-goto]"); if (b) goToProduct(+b.dataset.goto); });
+/* Guía de tallas por marca y tipo de prenda, en cm. Cargar las medidas de la guía oficial de cada marca, por ejemplo:
+   GUIAS["YoungLA/superior"] = { M: [104, 70], L: [110, 72] }   (columnas en el orden de GUIA_COLS) */
+const GUIA_COLS = {superior:["Pecho","Largo"], inferior:["Cintura","Largo"]};
+const GUIAS = {};
+const tipoDe = p => /pantal|short/i.test(p.categoria) ? "inferior" : "superior";
 
-/* Filtros */
-const brands = ["Todas", ...new Set(PRODUCTS.map(p => p.brand))];
-$("brandChips").innerHTML = brands.map(b => '<button class="fchip" data-b="' + esc(b) + '" aria-pressed="' + (b === "Todas") + '">' + esc(b) + '</button>').join("");
-const cats = [...new Set(PRODUCTS.map(p => p.cat))].sort();
-$("fCat").innerHTML = '<option value="">Todas las categorías</option>' + cats.map(c => '<option>' + esc(c) + '</option>').join("");
-const sizes = SIZE_ORDER.filter(s => PRODUCTS.some(p => p.sizes.includes(s)));
-$("fSize").innerHTML = '<option value="">Todas las tallas</option>' + sizes.map(s => '<option>' + s + '</option>').join("");
+const nameOf = p => (p.modelo ? p.modelo + " " : "") + p.nombre;
+const sizesOf = c => Object.keys(c.stock).sort((a, b) => SIZE_ORDER.indexOf(a) - SIZE_ORDER.indexOf(b));
+const unitsOf = c => Object.values(c.stock).reduce((a, n) => a + n, 0);
+const soldOut = p => p.colores.every(c => !unitsOf(c));
+const colorIdx = {};                                   // id → color elegido en la tarjeta
+const colorOf = p => p.colores[colorIdx[p.id] || 0];
+const colorByName = (p, n) => p.colores.find(c => c.nombre === n);
+const notifyLink = (p, c, size) => wa("Hola LEGACY, avísenme si vuelve: " + nameOf(p) + " (" + c.nombre + (size ? ", talla " + size : "") + ").", WA_STORE);
+const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-$("genderSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return;
-  st.gender = b.dataset.g; $("genderSeg").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b)); st.page = 1; renderStore(); });
-$("brandChips").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return;
-  st.brand = b.dataset.b; $("brandChips").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b)); st.page = 1; renderStore(); });
-$("fCat").onchange = e => { st.cat = e.target.value; st.page = 1; renderStore(); };
-$("fSize").onchange = e => { st.size = e.target.value; st.page = 1; renderStore(); };
-$("fSort").onchange = e => { st.sort = e.target.value; st.page = 1; renderStore(); };
-$("clearBtn").onclick = () => resetFilters(true);
+/* ---------- Pedido (carrito) ---------- */
+let cart = [];
+try {
+  cart = JSON.parse(localStorage.getItem("legacy_cart_v2") || "[]").filter(l => {
+    const p = byId[l.id], c = p && colorByName(p, l.color); return c && c.stock[l.size] > 0 && l.qty > 0;
+  }).map(l => ({...l, qty: Math.min(l.qty, colorByName(byId[l.id], l.color).stock[l.size])}));
+} catch (e) { cart = []; }
+function saveCart(){ try { localStorage.setItem("legacy_cart_v2", JSON.stringify(cart)); } catch (e) {} }
+const lineOf = (id, color, size) => cart.find(l => l.id === id && l.color === color && l.size === size);
+const qtyIn = (id, color, size) => (lineOf(id, color, size) || {qty:0}).qty;
+const cartCount = () => cart.reduce((a, l) => a + l.qty, 0);
+const total = () => cart.reduce((a, l) => a + byId[l.id].precio * l.qty, 0);
 
-function resetFilters(render){
-  Object.assign(st, {gender:"all", brand:"Todas", cat:"", size:"", sort:"featured", page:1});
-  $("genderSeg").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x.dataset.g === "all"));
-  $("brandChips").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x.dataset.b === "Todas"));
-  $("fCat").value = ""; $("fSize").value = ""; $("fSort").value = "featured";
-  if (render) renderStore();
+function addToCart(p, c, size){
+  const max = c.stock[size] || 0, line = lineOf(p.id, c.nombre, size);
+  if (!max){ toast("La talla " + size + " está agotada."); return false; }
+  if (line && line.qty >= max){ toast(max === 1 ? "Ya tienes la única unidad de la talla " + size + " en tu pedido." : "Ya tienes las " + max + " unidades de la talla " + size + " en tu pedido."); return false; }
+  if (line) line.qty++; else cart.push({id:p.id, color:c.nombre, size, qty:1});
+  saveCart(); renderCart(); refreshCard(p.id);
+  toast("Agregado: talla " + size + (p.colores.length > 1 ? " · " + c.nombre : ""), {label:"Ver pedido", fn:openCart});
+  const cb = $("cartBtn"); cb.classList.remove("bump"); void cb.offsetWidth; cb.classList.add("bump");
+  return true;
 }
-function openStore(brand){
-  showView("tienda"); resetFilters(false);
-  if (brand && brand !== "Todas"){ st.brand = brand; $("brandChips").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x.dataset.b === brand)); }
-  renderStore();
+function removeLine(i){
+  const [gone] = cart.splice(i, 1); saveCart(); renderCart(); refreshCard(gone.id);
+  toast("Quitaste " + nameOf(byId[gone.id]) + " (talla " + gone.size + ").", {label:"Deshacer", fn:() => {
+    cart.splice(Math.min(i, cart.length), 0, gone); saveCart(); renderCart(); refreshCard(gone.id); }});
 }
 
-function filtered(){
-  let l = PRODUCTS.filter(p =>
-    (st.gender === "all" || p.gender === st.gender || p.gender === "U") &&
-    (st.brand === "Todas" || p.brand === st.brand) &&
-    (!st.cat || p.cat === st.cat) &&
-    (!st.size || p.sizes.includes(st.size)));
-  const rank = {drop:0, nuevo:1};
-  const cmp = {
-    featured: (a,b) => a.id - b.id,
-    new: (a,b) => (rank[a.tag] ?? 2) - (rank[b.tag] ?? 2) || a.id - b.id,
-    asc: (a,b) => a.price - b.price,
-    desc: (a,b) => b.price - a.price };
-  return l.sort((a,b) => (a.sold - b.sold) || cmp[st.sort](a,b));   // agotados siempre al final
+/* ---------- Capas: pedido, hoja de tallas y hoja de filtros. Abierta una, el resto de la página es inerte. ---------- */
+let layer = null, layerFrom = null;
+const pageParts = () => [document.querySelector("header"), document.querySelector("main"), $("waFloat")];
+function openLayer(id){
+  if (layer) closeLayer(null);
+  const el = $(id); layerFrom = document.activeElement; layer = el;
+  if (layerFrom && layerFrom.closest && layerFrom.closest("#toast")) layerFrom = $("cartBtn");
+  el.inert = false; el.setAttribute("aria-hidden", "false"); el.classList.add("open"); $("overlay").classList.add("open");
+  pageParts().forEach(x => x.inert = true);
+  setTimeout(() => el.querySelector("[data-close]").focus(), 50);
 }
-const filtersActive = () => st.gender !== "all" || st.brand !== "Todas" || st.cat || st.size || st.sort !== "featured";
+function closeLayer(focusTo){
+  if (!layer) return;
+  const el = layer; layer = null;
+  el.classList.remove("open"); el.setAttribute("aria-hidden", "true"); el.inert = true; $("overlay").classList.remove("open");
+  pageParts().forEach(x => x.inert = false);
+  if (el.id === "filterSheet") homeFilters();
+  if (focusTo === null) return;
+  const t = typeof focusTo === "function" ? focusTo() : (layerFrom && document.contains(layerFrom) ? layerFrom : null);
+  if (t) t.focus();
+}
+const openCart = () => openLayer("drawer");
+const closeCart = () => closeLayer();
+document.addEventListener("click", e => {
+  if (e.target.closest("[data-close]")) closeLayer();
+  if (e.target.closest("[data-clear]")) setFilter({...DEFAULTS});
+});
+$("overlay").onclick = () => closeLayer();
+addEventListener("keydown", e => { if (e.key === "Escape" && layer) closeLayer(); });
+$("cartBtn").onclick = openCart;
 
-/* ProductCard: foto 4:5 + sello · badges arriba a la izquierda (AGOTADO a la derecha) · marca · nombre · color y talla · precio · botón */
+/* ---------- Tarjeta de producto ---------- */
 function card(p){
-  const inCart = cart.some(c => c.id === p.id);
-  const multi = p.sizes.length > 1;
-  const sel = inCart ? cart.find(c => c.id === p.id).size : chosen[p.id];
-  const badges = p.tag && !p.sold ? '<div class="badges"><span class="lg-badge ' + TAG[p.tag][0] + '">' + TAG[p.tag][1] + '</span></div>' : "";
-  const sizeUI = multi && !p.sold
-    ? '<p class="meta">' + esc(p.color) + ' · Elige tu talla</p><div class="sizes" role="group" aria-label="Talla">' + p.sizes.map(s => '<button class="sz" data-act="size" data-id="' + p.id + '" data-size="' + s + '" aria-pressed="' + (sel === s) + '"' + (inCart ? " disabled" : "") + '>' + s + '</button>').join("") + '</div>'
-    : '<p class="meta">' + esc(p.color) + ' · Talla ' + p.sizes.join(" / ") + '</p>';
-  let btn;
-  if (p.sold) btn = '<a class="lg-btn lg-btn-ghost lg-btn-block" target="_blank" rel="noopener" href="' + wa("Hola LEGACY, avísenme si vuelve: " + p.name + " (" + p.color + ", talla " + p.sizes.join("/") + ").", WA_STORE) + '">Avísame si vuelve</a>';
-  else if (inCart) btn = '<button class="lg-btn lg-btn-ghost lg-btn-block" data-act="toggle" data-id="' + p.id + '" aria-pressed="true">En tu pedido <span class="rm">· quitar</span></button>';
-  else btn = '<button class="lg-btn lg-btn-primary lg-btn-block" data-act="toggle" data-id="' + p.id + '">Lo quiero</button>';
-  return '<article class="lg-card lg-product' + (p.sold ? " is-sold" : "") + (p.light ? " light" : "") + '" id="p-' + p.id + '">' +
-    '<div class="photo"><img class="pic" src="' + p.photo + '" alt="' + esc(p.name) + '" loading="lazy"><img class="seal" src="' + SEAL + '" alt="">' + badges +
-    (p.sold ? '<span class="lg-badge lg-badge-sold sold-at">AGOTADO</span>' : "") + '</div>' +
-    '<div class="body"><span><span class="lg-badge lg-badge-brand">' + esc(p.brand) + '</span></span><h3 class="name">' + esc(p.name) + '</h3>' + sizeUI +
-    '<span class="price">' + fmt(p.price) + '</span>' + btn + '</div></article>';
+  const c = colorOf(p), sold = soldOut(p), cSold = !unitsOf(c), nm = nameOf(p), sizes = sizesOf(c), many = c.fotos.length > 1;
+  const pics = c.fotos.map((f, i) => '<img class="pic' + (c.claro ? " claro" : "") + '" src="' + f + '" alt="' + (i ? "" : esc(nm + ", " + c.nombre)) + '" loading="lazy" draggable="false">').join("");
+  const badges = p.etiqueta && !sold ? '<div class="badges"><span class="lg-badge ' + TAG[p.etiqueta][0] + '">' + TAG[p.etiqueta][1] + '</span></div>' : "";
+  const nav = many ? '<button class="nav prev" data-act="prev" aria-label="Foto anterior"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>' +
+    '<button class="nav next" data-act="next" aria-label="Foto siguiente"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>' +
+    '<div class="dots" aria-hidden="true">' + c.fotos.map((_, i) => '<span' + (i ? "" : ' class="on"') + '></span>').join("") + '</div>' : "";
+  const quick = cSold ? "" : '<div class="quick" role="group" aria-label="Agregar ' + esc(nm) + ' por talla"><span class="q-t">Agrega tu talla</span><div class="q-sizes">' +
+    sizes.map(s => { const n = c.stock[s], q = qtyIn(p.id, c.nombre, s);
+      return '<button class="qs' + (q ? " in" : "") + '" data-act="quick" data-size="' + s + '"' + (n ? "" : " disabled") +
+        ' aria-label="Talla ' + s + (n ? (n === 1 ? ", última unidad" : "") : ", agotada") + (q ? ", ya en tu pedido" : "") + '">' + s +
+        (q ? '<i class="ti ti-check" aria-hidden="true"></i>' : "") + '</button>'; }).join("") + '</div></div>';
+  const swatches = p.colores.length > 1 ? '<div class="swatches" role="group" aria-label="Colores">' + p.colores.map((k, i) =>
+    '<button class="sw' + (unitsOf(k) ? "" : " off") + '" data-act="color" data-ci="' + i + '" style="--sw:' + k.muestra + '" aria-label="Color: ' + esc(k.nombre) + (unitsOf(k) ? "" : ", agotado") +
+    '" aria-pressed="' + (k === c) + '"></button>').join("") + '</div>' : "";
+  const sizeTxt = sizes.map(s => c.stock[s] ? s : '<s>' + s + '<span class="sr-only"> (agotada)</span></s>').join(" · ");
+  const meta = '<p class="meta">' + esc(c.nombre) + " · " + (cSold && !sold ? "Agotado en este color" : (sizes.length > 1 ? "Tallas " : "Talla ") + sizeTxt) + '</p>';
+  const mine = cart.filter(l => l.id === p.id).map(l => l.size + (l.qty > 1 ? " ×" + l.qty : "") + (p.colores.length > 1 ? " (" + l.color + ")" : ""));
+  const inCart = mine.length ? '<p class="in-cart"><i class="ti ti-shopping-bag" aria-hidden="true"></i>En tu pedido: ' + esc(mine.join(", ")) + '</p>' : "";
+  const btn = cSold ? '<a class="lg-btn lg-btn-ghost lg-btn-block" target="_blank" rel="noopener" href="' + notifyLink(p, c) + '">Avísame si vuelve</a>'
+    : '<button class="lg-btn lg-btn-primary lg-btn-block" data-act="want"' + (sizes.length > 1 ? ' aria-haspopup="dialog"' : "") + '>Lo quiero</button>';
+  return '<article class="lg-card lg-product' + (sold ? " is-sold" : "") + '" id="p-' + p.id + '" data-id="' + p.id + '" tabindex="-1">' +
+    '<div class="photo"><div class="slides" data-slides tabindex="-1">' + pics + '</div><img class="seal" src="' + SEAL + '" alt="">' + badges +
+    (sold ? '<span class="lg-badge lg-badge-sold sold-at">AGOTADO</span>' : "") + nav + quick + '</div>' +
+    '<div class="body"><span><span class="lg-badge lg-badge-brand">' + esc(p.marca) + '</span></span><h3 class="name">' + esc(nm) + '</h3>' +
+    swatches + meta + inCart + '<span class="price">' + fmt(p.precio) + '</span>' + btn + '</div></article>';
 }
+function refreshCard(id){ const el = $("p-" + id); if (el) el.outerHTML = card(byId[id]); }
 
-function renderStore(){
-  const list = filtered();
-  const pages = Math.max(1, Math.ceil(list.length / PER_PAGE));
-  if (st.page > pages) st.page = pages;
-  const slice = list.slice((st.page - 1) * PER_PAGE, st.page * PER_PAGE);
-  $("storeGrid").innerHTML = slice.length ? slice.map(card).join("")
-    : '<div class="empty">No hay prendas con esos filtros. <button class="clear show" onclick="resetFilters(true)">Limpiar filtros</button></div>';
-  const avail = list.filter(p => !p.sold).length;
-  $("storeCount").textContent = list.length + " prenda" + (list.length !== 1 ? "s" : "") + " · " + avail + " disponible" + (avail !== 1 ? "s" : "");
-  $("clearBtn").classList.toggle("show", !!filtersActive());
-  let pg = "";
-  if (pages > 1){
-    pg += '<button class="pg" data-pg="' + (st.page - 1) + '" ' + (st.page === 1 ? "disabled" : "") + ' aria-label="Anterior"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>';
-    for (let i = 1; i <= pages; i++) pg += '<button class="pg" data-pg="' + i + '"' + (i === st.page ? ' aria-current="page"' : "") + '>' + i + '</button>';
-    pg += '<button class="pg" data-pg="' + (st.page + 1) + '" ' + (st.page === pages ? "disabled" : "") + ' aria-label="Siguiente"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>';
-  }
-  $("pager").innerHTML = pg;
+/* Carrusel: deslizar en celular; flechas (con vuelta al inicio) en escritorio; los puntos siguen al desplazamiento */
+function slide(art, dir){
+  const s = art.querySelector("[data-slides]"), n = s.children.length, i = Math.round(s.scrollLeft / s.clientWidth);
+  s.scrollTo({left: ((i + dir + n) % n) * s.clientWidth, behavior: reduceMotion() ? "auto" : "smooth"});
 }
-$("pager").addEventListener("click", e => { const b = e.target.closest("[data-pg]"); if (!b || b.disabled) return;
-  st.page = +b.dataset.pg; renderStore(); $("tienda").scrollIntoView({behavior:"smooth"}); });
+$("storeGrid").addEventListener("scroll", e => {
+  const s = e.target; if (!s.matches || !s.matches("[data-slides]")) return;
+  const i = Math.round(s.scrollLeft / s.clientWidth);
+  s.parentElement.querySelectorAll(".dots span").forEach((d, k) => d.classList.toggle("on", k === i));
+}, true);
 
 $("storeGrid").addEventListener("click", e => {
   const b = e.target.closest("[data-act]"); if (!b) return;
-  const p = byId[+b.dataset.id];
-  if (b.dataset.act === "size"){ chosen[p.id] = b.dataset.size; rerenderCard(p.id); return; }
-  if (cart.some(c => c.id === p.id)){ removeFromCart(p.id); return; }
-  const size = p.sizes.length > 1 ? chosen[p.id] : p.sizes[0];
-  if (!size){ const s = $("p-" + p.id).querySelector(".sizes"); s.classList.remove("flash"); void s.offsetWidth; s.classList.add("flash"); return; }
-  cart.push({id:p.id, size}); saveCart(); renderCart(); rerenderCard(p.id);
-  toast("Agregado a tu pedido"); const cb = $("cartBtn"); cb.classList.remove("bump"); void cb.offsetWidth; cb.classList.add("bump");
+  const art = b.closest(".lg-product"), p = byId[+art.dataset.id], c = colorOf(p), act = b.dataset.act;
+  const kb = e.detail === 0;                         // activado con teclado: devolver el foco al mismo control tras redibujar
+  const refocus = sel => { if (kb){ const x = $("p-" + p.id) && $("p-" + p.id).querySelector(sel); if (x) x.focus(); } };
+  if (act === "prev" || act === "next") return slide(art, act === "next" ? 1 : -1);
+  if (act === "color"){ colorIdx[p.id] = +b.dataset.ci; refreshCard(p.id); refocus('[data-ci="' + b.dataset.ci + '"]'); return; }
+  if (act === "quick"){ addToCart(p, c, b.dataset.size); refocus('[data-act="quick"][data-size="' + b.dataset.size + '"]'); return; }
+  if (act === "want"){
+    const sizes = sizesOf(c);
+    if (sizes.length === 1){ addToCart(p, c, sizes[0]); refocus('[data-act="want"]'); }   // pieza de una sola talla: se agrega directo
+    else openSizes(p);
+  }
 });
-function rerenderCard(id){ const el = $("p-" + id); if (el) el.outerHTML = card(byId[id]); }
 
-function goToProduct(id){
-  showView("tienda"); resetFilters(false);
-  const idx = filtered().findIndex(p => p.id === id);
-  st.page = Math.floor(idx / PER_PAGE) + 1; renderStore();
-  requestAnimationFrame(() => { const el = $("p-" + id); if (!el) return;
-    el.scrollIntoView({behavior:"smooth", block:"center"}); el.classList.add("pulse"); setTimeout(() => el.classList.remove("pulse"), 3400); });
+/* ---------- Hoja de tallas y guía de tallas ---------- */
+let sheetFor = null;
+function openSizes(p){ sheetFor = p.id; renderSizes(); openLayer("sizeSheet"); }
+function renderSizes(view){
+  const p = byId[sheetFor], c = colorOf(p), nm = nameOf(p);
+  $("ssTitle").textContent = view === "guide" ? "Guía de tallas" : "Elige tu talla";
+  if (view === "guide"){
+    $("ssBody").innerHTML = guideHtml(p) + '<button class="guide-link" data-ss="back"><i class="ti ti-arrow-left" aria-hidden="true"></i>Volver a las tallas</button>';
+    return;
+  }
+  const swatches = p.colores.length > 1 ? '<p class="sw-label">Color: <b>' + esc(c.nombre) + '</b></p><div class="swatches" role="group" aria-label="Colores">' + p.colores.map((k, i) =>
+    '<button class="sw' + (unitsOf(k) ? "" : " off") + '" data-ss="color" data-ci="' + i + '" style="--sw:' + k.muestra + '" aria-label="Color: ' + esc(k.nombre) + (unitsOf(k) ? "" : ", agotado") +
+    '" aria-pressed="' + (k === c) + '"></button>').join("") + '</div>' : "";
+  $("ssBody").innerHTML =
+    '<div class="ss-prod"><img src="' + c.fotos[0] + '" alt=""' + (c.claro ? ' class="claro"' : "") + '><div><span class="lg-badge lg-badge-brand">' + esc(p.marca) + '</span>' +
+    '<p class="ss-name">' + esc(nm) + '</p><p class="ss-meta">' + esc(c.nombre) + ' · <span class="ss-price">' + fmt(p.precio) + '</span></p></div></div>' + swatches +
+    '<ul class="sz-rows">' + sizesOf(c).map(s => {
+      const n = c.stock[s], q = qtyIn(p.id, c.nombre, s);
+      if (!n) return '<li><a class="sz-row off" target="_blank" rel="noopener" href="' + notifyLink(p, c, s) + '"><span class="s">' + s + '</span><span class="st">Agotada</span><span class="go">Avísame si vuelve</span></a></li>';
+      const full = q >= n;
+      return '<li><button class="sz-row" data-ss="add" data-size="' + s + '"' + (full ? " disabled" : "") + '><span class="s">' + s + '</span>' +
+        '<span class="st">' + (full ? "Ya está en tu pedido" : n === 1 ? "Última unidad" : n + " unidades") + '</span>' +
+        '<span class="go">' + (full ? '<i class="ti ti-check" aria-hidden="true"></i>' : 'Agregar <i class="ti ti-plus" aria-hidden="true"></i>') + '</span></button></li>';
+    }).join("") + '</ul>' +
+    '<button class="guide-link" data-ss="guide"><i class="ti ti-ruler-measure" aria-hidden="true"></i>Guía de tallas</button>';
+}
+function guideHtml(p){
+  const t = tipoDe(p), cols = GUIA_COLS[t], data = GUIAS[p.marca + "/" + t] || {};
+  const sizes = SIZE_ORDER.filter(s => p.colores.some(c => s in c.stock) || data[s]);
+  return '<div class="guide"><p class="ss-meta">' + esc(p.marca) + " · " + (t === "superior" ? "Prendas de arriba" : "Prendas de abajo") + " · medidas en cm</p>" +
+    '<table><thead><tr><th scope="col">Talla</th>' + cols.map(h => '<th scope="col">' + h + "</th>").join("") + "</tr></thead><tbody>" +
+    sizes.map(s => '<tr><th scope="row">' + s + "</th>" + cols.map((_, i) => "<td>" + (data[s] ? data[s][i] : "—") + "</td>").join("") + "</tr>").join("") +
+    "</tbody></table>" +
+    (Object.keys(data).length ? "" : '<p class="gnote">Medidas por cargar desde la guía oficial de ' + esc(p.marca) + ". Si dudas entre dos tallas, escríbenos por WhatsApp y te ayudamos a elegir.</p>") + "</div>";
+}
+$("ssBody").addEventListener("click", e => {
+  const b = e.target.closest("[data-ss]"); if (!b) return;
+  const p = byId[sheetFor], go = sel => { const x = $("ssBody").querySelector(sel); if (x) x.focus(); };
+  if (b.dataset.ss === "color"){ colorIdx[p.id] = +b.dataset.ci; refreshCard(p.id); renderSizes(); go('[data-ci="' + b.dataset.ci + '"]'); return; }
+  if (b.dataset.ss === "guide"){ renderSizes("guide"); go('[data-ss="back"]'); return; }
+  if (b.dataset.ss === "back"){ renderSizes(); go('[data-ss="guide"]'); return; }
+  if (b.dataset.ss === "add" && addToCart(p, colorOf(p), b.dataset.size))
+    closeLayer(() => $("p-" + p.id) && $("p-" + p.id).querySelector('[data-act="want"]'));
+});
+
+/* ---------- Equípate: selección curada para el plan (Coaching → Store) ---------- */
+const GEAR = [14, 19, 23, 15];
+$("gearRow").innerHTML = GEAR.map(id => { const p = byId[id], c = p.colores[0];
+  return '<button class="lg-card lg-product" data-goto="' + id + '"><div class="photo"><img class="pic' + (c.claro ? " claro" : "") + '" src="' + c.fotos[0] + '" alt="" loading="lazy"><img class="seal" src="' + SEAL + '" alt=""></div>' +
+  '<div class="body"><span><span class="lg-badge lg-badge-brand">' + esc(p.marca) + '</span></span><span class="name">' + esc(nameOf(p)) + '</span><span class="meta">' + esc(c.nombre) + '</span><span class="price">' + fmt(p.precio) + '</span></div></button>';
+}).join("");
+$("gearRow").addEventListener("click", e => { const b = e.target.closest("[data-goto]"); if (b) goToProduct(+b.dataset.goto); });
+
+/* ---------- Filtros: con cantidad por opción, en el enlace y, en celular, en una hoja ---------- */
+const BRANDS = [...new Set(PRODUCTS.map(p => p.marca))];
+const CATS = [...new Set(PRODUCTS.map(p => p.categoria))].sort();
+const SIZES = SIZE_ORDER.filter(s => PRODUCTS.some(p => p.colores.some(c => s in c.stock)));
+const COLORS = Object.keys(FAMILIAS).filter(f => PRODUCTS.some(p => p.colores.some(c => c.familia === f)));
+const DEFAULTS = {gender:"all", brand:"Todas", cat:"", size:"", color:"", avail:false, sort:"featured"};
+const st = {...DEFAULTS, shown:PER_PAGE};
+
+// Talla = hay stock en esa talla; color + talla = hay stock de esa talla en ese color; "Solo disponibles" = ese color tiene stock.
+const colorOk = (c, s = st) => (!s.color || c.familia === s.color) && (!s.size || (c.stock[s.size] || 0) > 0) && (!s.avail || unitsOf(c) > 0);
+function matches(p, s = st){
+  return (s.gender === "all" || p.genero === s.gender || p.genero === "U") &&
+    (s.brand === "Todas" || p.marca === s.brand) && (!s.cat || p.categoria === s.cat) &&
+    p.colores.some(c => colorOk(c, s));
+}
+const countWith = patch => PRODUCTS.filter(p => matches(p, {...st, ...patch})).length;
+function filtered(){
+  const rank = {drop:0, nuevo:1};
+  const cmp = {featured:(a, b) => a.id - b.id, new:(a, b) => (rank[a.etiqueta] ?? 2) - (rank[b.etiqueta] ?? 2) || a.id - b.id,
+    asc:(a, b) => a.precio - b.precio, desc:(a, b) => b.precio - a.precio};
+  return PRODUCTS.filter(p => matches(p)).sort((a, b) => (soldOut(a) - soldOut(b)) || cmp[st.sort](a, b));   // agotados siempre al final
+}
+const activeFilters = () => ["gender","brand","cat","size","color","avail"].filter(k => st[k] !== DEFAULTS[k]).length;
+const opt = (value, label, n, sel) => '<option value="' + esc(value) + '"' + (sel ? " selected" : "") + (n || sel || !value ? "" : " disabled") + ">" + esc(label) + (value ? " (" + n + ")" : "") + "</option>";
+function renderFilters(){
+  $("brandChips").innerHTML = ["Todas", ...BRANDS].map(b => { const n = countWith({brand:b}), on = st.brand === b;
+    return '<button class="fchip" data-b="' + esc(b) + '" aria-pressed="' + on + '"' + (n || on ? "" : " disabled") + ">" + esc(b) + ' <span class="n">' + n + "</span></button>"; }).join("");
+  $("fCat").innerHTML = opt("", "Todas las categorías", 0, !st.cat) + CATS.map(c => opt(c, c, countWith({cat:c}), st.cat === c)).join("");
+  $("fSize").innerHTML = opt("", "Todas las tallas", 0, !st.size) + SIZES.map(s => opt(s, s, countWith({size:s}), st.size === s)).join("");
+  $("fColor").innerHTML = opt("", "Todos los colores", 0, !st.color) + COLORS.map(f => opt(f, FAMILIAS[f], countWith({color:f}), st.color === f)).join("");
+  $("fSort").value = st.sort;
+  $("fAvail").checked = st.avail; $("fAvailN").textContent = "(" + countWith({avail:true}) + ")";
+  $("genderSeg").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x.dataset.g === st.gender));
+  const a = activeFilters(); $("fCount").textContent = a; $("fCount").hidden = !a;
+}
+function setFilter(patch){ Object.assign(st, patch, {shown:PER_PAGE}); renderStore(); }
+$("genderSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setFilter({gender:b.dataset.g}); });
+$("brandChips").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b || b.disabled) return;
+  const key = b.dataset.b; setFilter({brand:key});
+  if (e.detail === 0) $("brandChips").querySelector('[data-b="' + CSS.escape(key) + '"]').focus();
+});
+$("fCat").onchange = e => setFilter({cat:e.target.value});
+$("fSize").onchange = e => setFilter({size:e.target.value});
+$("fColor").onchange = e => setFilter({color:e.target.value});
+$("fSort").onchange = e => setFilter({sort:e.target.value});
+$("fAvail").onchange = e => setFilter({avail:e.target.checked});
+
+function openFilters(){ $("fsBody").appendChild(document.querySelector(".filters")); openLayer("filterSheet"); }
+function homeFilters(){ const f = document.querySelector(".filters"); if (f.parentElement !== $("filtersHome")) $("filtersHome").appendChild(f); }
+$("filterToggle").onclick = openFilters;
+$("fsApply").onclick = () => closeLayer();
+matchMedia("(min-width: 721px)").addEventListener("change", e => { if (e.matches && layer && layer.id === "filterSheet") closeLayer(null); });
+
+/* Enlace compartible: ?tienda&marca=YoungLA&talla=M&color=negro&orden=menor-precio */
+const GEN = {all:"", H:"hombre", M:"mujer"};
+const ORDEN = {featured:"", new:"novedades", asc:"menor-precio", desc:"mayor-precio"};
+const keyOf = (m, v) => Object.keys(m).find(k => m[k] === v);
+function syncUrl(){
+  if (!$("tienda").classList.contains("active")) return;
+  const q = [["genero", GEN[st.gender]], ["marca", st.brand === "Todas" ? "" : st.brand], ["categoria", st.cat], ["talla", st.size], ["color", st.color], ["disponibles", st.avail ? "1" : ""], ["orden", ORDEN[st.sort]]]
+    .filter(([, v]) => v).map(([k, v]) => k + "=" + encodeURIComponent(v)).join("&");
+  history.replaceState(null, "", location.pathname + "?tienda" + (q ? "&" + q : ""));
+}
+function readUrl(){
+  const q = new URLSearchParams(location.search); if (!q.has("tienda")) return false;
+  const pick = (list, v) => list.includes(v) ? v : "";
+  Object.assign(st, DEFAULTS, {
+    gender: keyOf(GEN, q.get("genero") || "") || "all", brand: pick(BRANDS, q.get("marca")) || "Todas",
+    cat: pick(CATS, q.get("categoria")), size: pick(SIZES, q.get("talla")), color: pick(COLORS, q.get("color")), avail: q.get("disponibles") === "1",
+    sort: keyOf(ORDEN, q.get("orden") || "") || "featured"});
+  return true;
 }
 
-/* ---------- Carrito ---------- */
-let cart = [];
-try { cart = (JSON.parse(localStorage.getItem("legacy_cart") || "[]")).filter(c => byId[c.id] && !byId[c.id].sold); } catch(e) { cart = []; }
-function saveCart(){ try { localStorage.setItem("legacy_cart", JSON.stringify(cart)); } catch(e) {} }
-function removeFromCart(id){ cart = cart.filter(c => c.id !== id); delete chosen[id]; saveCart(); renderCart(); rerenderCard(id); }
-const total = () => cart.reduce((s,c) => s + byId[c.id].price, 0);
+function renderStore(){
+  // Con filtro de color, talla o "Solo disponibles", cada tarjeta muestra el color que coincide.
+  if (st.color || st.size || st.avail)
+    PRODUCTS.forEach(p => { if (!colorOk(colorOf(p))){ const i = p.colores.findIndex(c => colorOk(c)); if (i >= 0) colorIdx[p.id] = i; } });
+  const list = filtered(), shown = list.slice(0, st.shown), avail = list.filter(p => p.colores.some(c => colorOk(c) && unitsOf(c) > 0)).length;
+  $("storeGrid").innerHTML = shown.length ? shown.map(card).join("")
+    : '<div class="empty">No hay prendas con esos filtros. <button class="clear show" data-clear>Limpiar filtros</button></div>';
+  $("storeCount").textContent = list.length + " prenda" + (list.length !== 1 ? "s" : "") + " · " + avail + " disponible" + (avail !== 1 ? "s" : "");
+  $("clearBtn").classList.toggle("show", activeFilters() > 0 || st.sort !== "featured");
+  const rest = list.length - shown.length;
+  $("moreRow").hidden = rest <= 0;
+  $("moreInfo").textContent = "Viste " + shown.length + " de " + list.length + " prendas";
+  $("moreBtn").textContent = "Ver más (" + rest + ")";
+  $("fsApply").textContent = "Ver " + list.length + " prenda" + (list.length !== 1 ? "s" : "");
+  renderFilters(); syncUrl();
+}
+$("moreBtn").onclick = () => {
+  const first = st.shown; st.shown += PER_PAGE; renderStore();
+  const el = $("storeGrid").children[first]; if (el) el.focus({preventScroll:true});
+};
+function openStore(brand){ Object.assign(st, DEFAULTS, {shown:PER_PAGE}, brand && brand !== "Todas" ? {brand} : {}); showView("tienda"); renderStore(); }
+function goToProduct(id){
+  Object.assign(st, DEFAULTS); showView("tienda");
+  const idx = filtered().findIndex(p => p.id === id);
+  st.shown = Math.max(PER_PAGE, Math.ceil((idx + 1) / PER_PAGE) * PER_PAGE); renderStore();
+  requestAnimationFrame(() => { const el = $("p-" + id); if (!el) return;
+    el.scrollIntoView({behavior: reduceMotion() ? "auto" : "smooth", block:"center"}); el.focus({preventScroll:true});
+    el.classList.add("pulse"); setTimeout(() => el.classList.remove("pulse"), 3400); });
+}
 
+/* ---------- Pedido: líneas con color, talla y cantidad (hasta el stock) ---------- */
 function renderCart(){
-  const n = cart.length;
+  const n = cartCount();
   $("cartCount").textContent = n; $("cartCount").classList.toggle("show", n > 0);
-  $("cartN").textContent = n; $("cartTotal").textContent = fmt(total());
+  $("cartN").textContent = n + (n === 1 ? " prenda" : " prendas"); $("cartTotal").textContent = fmt(total());
   $("cartRest").style.display = n ? "" : "none";
   $("sendOrder").disabled = !n;
-  $("cartLines").innerHTML = n ? cart.map(c => { const p = byId[c.id];
-    return '<div class="line"><img src="' + p.photo + '" alt=""><div><div class="ln">' + esc(p.name) + '</div><div class="lm">' + esc(p.brand) + " · " + esc(p.color) + " · Talla " + c.size + '</div></div>' +
-      '<div><div class="lp">' + fmt(p.price) + '</div><button class="lr" data-rm="' + p.id + '">Quitar</button></div></div>'; }).join("")
+  $("cartLines").innerHTML = n ? cart.map((l, i) => { const p = byId[l.id], c = colorByName(p, l.color), max = c.stock[l.size];
+    return '<div class="line"><img src="' + c.fotos[0] + '" alt=""' + (c.claro ? ' class="claro"' : "") + '><div><div class="ln">' + esc(nameOf(p)) + '</div>' +
+      '<div class="lm">' + esc(p.marca) + " · " + esc(c.nombre) + " · Talla " + l.size + '</div>' +
+      (max > 1 ? '<div class="qty" role="group" aria-label="Cantidad de ' + esc(nameOf(p)) + '"><button data-q="-1" data-i="' + i + '" aria-label="Una menos"' + (l.qty <= 1 ? " disabled" : "") + '>−</button>' +
+        '<span>' + l.qty + '</span><button data-q="1" data-i="' + i + '" aria-label="Una más"' + (l.qty >= max ? " disabled" : "") + '>+</button></div>' : "") +
+      '</div><div><div class="lp">' + fmt(p.precio * l.qty) + '</div><button class="lr" data-rm="' + i + '" aria-label="Quitar ' + esc(nameOf(p)) + ', talla ' + l.size + '">Quitar</button></div></div>'; }).join("")
     : '<div class="cart-empty">Tu pedido está vacío.<br><button class="lg-btn lg-btn-ghost" id="goShop">Ver la tienda</button></div>';
 }
 $("cartLines").addEventListener("click", e => {
-  const r = e.target.closest("[data-rm]"); if (r) removeFromCart(+r.dataset.rm);
-  if (e.target.closest("#goShop")){ closeCart(); showView("tienda"); }
+  const r = e.target.closest("[data-rm]");
+  if (r){ removeLine(+r.dataset.rm); const nx = $("cartLines").querySelector("[data-rm]") || $("closeCart"); nx.focus(); return; }
+  const q = e.target.closest("[data-q]");
+  if (q){ const l = cart[+q.dataset.i]; l.qty += +q.dataset.q; saveCart(); renderCart(); refreshCard(l.id);
+    const same = $("cartLines").querySelector('[data-i="' + q.dataset.i + '"][data-q="' + q.dataset.q + '"]');
+    (same && !same.disabled ? same : $("cartLines").querySelector('[data-i="' + q.dataset.i + '"]:not(:disabled)') || $("closeCart")).focus(); return; }
+  if (e.target.closest("#goShop")){ closeLayer(null); showView("tienda"); renderStore(); }
 });
-
-let lastFocus = null;
-/* Cerrado: el carrito es inerte (no se alcanza con Tab). Abierto: lo inerte es el resto de la página. */
-const behindCart = () => [document.querySelector("header"), document.querySelector("main"), $("waFloat")];
-function openCart(){ lastFocus = document.activeElement; const d = $("drawer"); d.inert = false; d.classList.add("open"); $("overlay").classList.add("open"); d.setAttribute("aria-hidden","false"); behindCart().forEach(el => el.inert = true); setTimeout(() => $("closeCart").focus(), 50); }
-function closeCart(){ const d = $("drawer"); d.classList.remove("open"); $("overlay").classList.remove("open"); d.setAttribute("aria-hidden","true"); d.inert = true; behindCart().forEach(el => el.inert = false); if (lastFocus) lastFocus.focus(); }
-$("cartBtn").onclick = openCart; $("closeCart").onclick = closeCart; $("overlay").onclick = closeCart;
-addEventListener("keydown", e => { if (e.key === "Escape" && $("drawer").classList.contains("open")) closeCart(); });
 
 function field(id, ok){ $(id).closest(".field").classList.toggle("err", !ok); $(id).toggleAttribute("aria-invalid", !ok); return ok; }
 ["oName","oPhone","oDept"].forEach(id => $(id).addEventListener("input", () => { $(id).closest(".field").classList.remove("err"); $(id).removeAttribute("aria-invalid"); }));
@@ -678,7 +987,8 @@ $("sendOrder").onclick = () => {
   const ok = [field("oName", !!name), field("oPhone", phone.replace(/\D/g,"").length >= 7), field("oDept", !!dept)].every(Boolean);
   if (!ok){ $("orderForm").querySelector(".err input, .err select").focus(); return; }
   const addr = $("oAddr").value.trim(), maps = $("oMaps").value.trim(), member = $("oMember").checked;
-  const lines = cart.map((c,i) => { const p = byId[c.id]; return (i+1) + ". " + p.name + " — " + p.brand + " (" + p.color + ", talla " + c.size + ") — " + fmt(p.price); });
+  const lines = cart.map((l, i) => { const p = byId[l.id];
+    return (i + 1) + ". " + nameOf(p) + " — " + p.marca + " (" + l.color + ", talla " + l.size + ")" + (l.qty > 1 ? " ×" + l.qty : "") + " — " + fmt(p.precio * l.qty); });
   const msg = ["*NUEVO PEDIDO — LEGACY STORE*", "", ...lines, "", "*TOTAL: " + fmt(total()) + "*", "",
     "*DATOS DE ENTREGA*", "Nombre: " + name, "Teléfono: " + phone, "Departamento: " + dept,
     addr ? "Dirección: " + addr : null, maps ? "Ubicación: " + maps : null,
@@ -687,9 +997,21 @@ $("sendOrder").onclick = () => {
   open(wa(msg, WA_STORE), "_blank", "noopener");
 };
 
-let tt;
-function toast(t){ $("toastText").textContent = t; $("toast").classList.add("show"); clearTimeout(tt); tt = setTimeout(() => $("toast").classList.remove("show"), 1800); }
+/* ---------- Aviso (toast), con acción opcional: "Ver pedido", "Deshacer". Se pausa al pasar el mouse. ---------- */
+let tt, ttMs = 0;
+function hideToastLater(){ clearTimeout(tt); tt = setTimeout(() => $("toast").classList.remove("show"), ttMs); }
+function toast(text, action){
+  $("toastText").textContent = text;
+  const a = $("toastAct"); a.hidden = !action;
+  if (action){ a.textContent = action.label; a.onclick = () => { $("toast").classList.remove("show"); action.fn(); }; }
+  $("toast").classList.add("show"); ttMs = action ? 5000 : 2400; hideToastLater();
+}
+$("toast").addEventListener("mouseenter", () => clearTimeout(tt));
+$("toast").addEventListener("mouseleave", hideToastLater);
+$("toast").addEventListener("focusin", () => clearTimeout(tt));
+$("toast").addEventListener("focusout", hideToastLater);
 
+if (readUrl()) showView("tienda");
 renderStore(); renderCart();
 </script>
 </body>
